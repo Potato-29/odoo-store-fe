@@ -38,7 +38,6 @@ const Sidebar = () => {
       if (response) {
         dispatch(clearCart());
         const cart = await getCart(user.id);
-        console.log("cart: ", cart);
         dispatch(saveCartToStore(cart));
         toast.success("Order Placed!", toast.success);
       }
