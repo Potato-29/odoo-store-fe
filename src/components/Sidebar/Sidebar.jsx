@@ -7,14 +7,14 @@ import { useDispatch, useSelector } from "react-redux";
 import { clearCart, saveCartToStore } from "../../store/cartSlice";
 import TextInput from "../TextInput/TextInput";
 import Button from "../Button/Button";
-import { placeOrder } from "../../service/orderService";
+import { placeOrder, trackOrder } from "../../service/orderService";
 
 const Sidebar = () => {
   const cart = useSelector((state) => (state ? state.cart : []));
   const user = JSON.parse(window.sessionStorage.getItem("user"));
   const [shippingAddress, setShippingAddress] = useState("");
   const [billingAddress, setBillingAddress] = useState("");
-
+  const [orders, setOrders] = useState();
   const dispatch = useDispatch();
   const getAllCartitems = async () => {
     try {
@@ -29,20 +29,40 @@ const Sidebar = () => {
   };
 
   const initiateCheckout = async () => {
+    if (
+      cart.items.length > 0 &&
+      shippingAddress !== "" &&
+      billingAddress !== ""
+    ) {
+      try {
+        const response = await placeOrder({
+          user,
+          order: cart,
+          shippingStatus: "Initiated",
+          address: { shippingAddress, billingAddress },
+        });
+        if (response) {
+          dispatch(clearCart());
+          const cart = await getCart(user.id);
+          dispatch(saveCartToStore(cart));
+          toast.success("Order Placed!", toastOptions);
+        }
+      } catch (error) {
+        console.log("error: ", error);
+        toast.error("Something went wrong!", toastOptions);
+      }
+    } else {
+      toast.warning("Cannot place order!", toastOptions);
+    }
+  };
+
+  const trackShipment = async () => {
     try {
-      const response = await placeOrder({
-        user,
-        order: cart,
-        address: { shippingAddress, billingAddress },
-      });
+      const response = await trackOrder();
       if (response) {
-        dispatch(clearCart());
-        const cart = await getCart(user.id);
-        dispatch(saveCartToStore(cart));
-        toast.success("Order Placed!", toast.success);
+        setOrders(response);
       }
     } catch (error) {
-      console.log("error: ", error);
       toast.error("Something went wrong!", toastOptions);
     }
   };
@@ -90,7 +110,7 @@ const Sidebar = () => {
       </div>
 
       <div className="mt-3">
-        <p>Shipment</p>
+        <p className="text-3xl">Shipment</p>
         <hr className="my-2" />
         <div>
           <div>
@@ -116,6 +136,28 @@ const Sidebar = () => {
               text={"Proceed to checkout"}
               onClick={() => initiateCheckout()}
             />
+          </div>
+          <div className="my-1 w-full">
+            <Button text={"Track Shipment"} onClick={() => trackShipment()} />
+          </div>
+
+          <div>
+            {console.log(orders)}
+            {orders?.map((orderItem) => (
+              <>
+                {orderItem.order.items.map((item) => (
+                  <div className="flex flex-row my-2 py-2 border">
+                    <div className="w-16 h-16 mx-2">
+                      <img src={item?.image} alt="" />
+                    </div>
+                    <div>
+                      <p>{item?.name}</p>
+                      <p className="font-bold">{orderItem.shippingStatus}</p>
+                    </div>
+                  </div>
+                ))}
+              </>
+            ))}
           </div>
         </div>
       </div>
