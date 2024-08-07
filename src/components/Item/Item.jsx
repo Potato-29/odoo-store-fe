@@ -40,7 +40,6 @@ const Item = ({ item }) => {
       );
       if (response) {
         const cart = await getCart(user.id);
-        console.log("cart: ", cart);
         // dispatch(saveCartToStore(cart));
       }
     } catch (error) {
