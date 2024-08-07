@@ -1,27 +1,23 @@
 import React from "react";
 import { toast } from "react-toastify";
 import { toastOptions } from "../../util/toastOptions";
-import { getCart, updateCart } from "../../service/cartService";
-import { useDispatch, useSelector } from "react-redux";
-import {
-  saveCartToStore,
-  setCartTotal,
-  setSubTotal,
-  setTax,
-} from "../../store/cartSlice";
-const CartItem = ({ item }) => {
+import { updateCart } from "../../service/cartService";
+import { useDispatch } from "react-redux";
+import { decreaseQty, increaseQty } from "../../store/cartSlice";
+const CartItem = ({ item, cart }) => {
   const dispatch = useDispatch();
-  const cart = useSelector((state) => (state ? state.cart.items : []));
 
   const updateQty = async (type) => {
     try {
-      const response = await updateCart(item._id, type);
-      if (response) {
-        const cart = await getCart();
-        dispatch(saveCartToStore(cart));
-        // calculateTotals();
-      }
+      dispatch(type === "increase" ? increaseQty(item) : decreaseQty(item));
+      const response = await updateCart(
+        cart.cartId,
+        cart.items,
+        item._id,
+        type
+      );
     } catch (error) {
+      console.log(error);
       toast.error("Failed to update", toastOptions);
     }
   };
@@ -33,7 +29,7 @@ const CartItem = ({ item }) => {
       </div>
       <div>
         <p>{item?.name}</p>
-        <p>{item?.price * item?.qty}</p>
+        <p>${item?.price * item?.qty}</p>
         <div className="flex flex-row">
           <button
             onClick={() => updateQty("decrease")}

@@ -7,8 +7,11 @@ export const getALL = async (page, limit, search = "") => {
   return data;
 };
 
-export const addToCart = async (item) => {
-  const { data } = await axiosInstance.post("/cart/add", item);
+export const addToCart = async (item, user) => {
+  const { data } = await axiosInstance.post("/cart/add", {
+    items: [{ ...item, qty: 1 }],
+    userId: user.id,
+  });
   return data.data;
 };
 

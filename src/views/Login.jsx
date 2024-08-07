@@ -22,7 +22,14 @@ const Login = () => {
         if (response) {
           toast.success("Login successfull", toastOptions);
           setCookie("token", response.token);
-          dispatch(authenticateUser(response.token));
+          dispatch(authenticateUser(response));
+          window.sessionStorage.setItem(
+            "user",
+            JSON.stringify({
+              email: response.email,
+              id: response.userId,
+            })
+          );
         }
       } else {
         const response = await signupUser({ email, password });
@@ -46,12 +53,14 @@ const Login = () => {
           <TextInput
             className={"border w-80 my-2"}
             placeholder={"Email"}
+            value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
           <TextInput
             type="password"
             className={"border w-80 my-2"}
             placeholder={"Password"}
+            value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
           <div className="flex flex-col my-2">
@@ -62,7 +71,11 @@ const Login = () => {
             />
             <p
               className="text-blue-400 cursor-pointer"
-              onClick={() => setIsLogin(false)}
+              onClick={() => {
+                setIsLogin(false);
+                setEmail("");
+                setPassword("");
+              }}
             >
               don't have an account? sign up!
             </p>
@@ -74,12 +87,14 @@ const Login = () => {
           <TextInput
             className={"border w-80 my-2"}
             placeholder={"Email"}
+            value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
           <TextInput
             type="password"
             className={"border w-80 my-2"}
             placeholder={"Password"}
+            value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
           <TextInput
@@ -95,7 +110,11 @@ const Login = () => {
             />
             <p
               className="text-blue-400 cursor-pointer"
-              onClick={() => setIsLogin(true)}
+              onClick={() => {
+                setIsLogin(true);
+                setEmail("");
+                setPassword("");
+              }}
             >
               Have an account? login in!
             </p>

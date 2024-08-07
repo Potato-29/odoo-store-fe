@@ -1,40 +1,55 @@
-import React, { useState } from "react";
+import React from "react";
 import Button from "../Button/Button";
-import { addToCart } from "../../service/productService";
 import { toast } from "react-toastify";
 import { toastOptions } from "../../util/toastOptions";
 import { getCart, updateCart } from "../../service/cartService";
 import { useDispatch, useSelector } from "react-redux";
-import { saveCartToStore } from "../../store/cartSlice";
+import {
+  addItemToCart,
+  decreaseQty,
+  increaseQty,
+  saveCartToStore,
+} from "../../store/cartSlice";
+import { addToCart } from "../../service/productService";
 
 const Item = ({ item }) => {
   const dispatch = useDispatch();
-  const cart = useSelector((state) => (state ? state.cart.items : []));
+  const cart = useSelector((state) => (state ? state.cart : []));
+  const user = JSON.parse(window.sessionStorage.getItem("user"));
+
   const addItem = async () => {
     try {
-      const response = await addToCart(item);
+      dispatch(addItemToCart(item));
+      const response = await addToCart(item, user);
       if (response) {
-        const cart = await getCart();
-        dispatch(saveCartToStore(cart));
+        const cart = await getCart(user.id);
+        // dispatch(saveCartToStore(cart));
       }
     } catch (error) {
       toast.error("failed to add to cart", toastOptions);
     }
   };
-
   const updateQty = async (type) => {
     try {
-      const response = await updateCart(item._id, type);
+      dispatch(type === "increase" ? increaseQty(item) : decreaseQty(item));
+      const response = await updateCart(
+        cart.cartId,
+        cart.items,
+        item._id,
+        type
+      );
       if (response) {
-        const cart = await getCart();
-        dispatch(saveCartToStore(cart));
+        const cart = await getCart(user.id);
+        console.log("cart: ", cart);
+        // dispatch(saveCartToStore(cart));
       }
     } catch (error) {
+      console.log("error: ", error);
       toast.error("Failed to update", toastOptions);
     }
   };
 
-  const cartItem = cart.find((cartItem) => cartItem._id === item._id);
+  const cartItem = cart.items.find((cartItem) => cartItem._id === item._id);
 
   return (
     <div className="">

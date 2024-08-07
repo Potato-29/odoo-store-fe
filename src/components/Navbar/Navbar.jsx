@@ -25,6 +25,7 @@ const Navbar = () => {
     <div className="w-full flex justify-center items-center shadow-lg p-4">
       <TextInput
         type="text"
+        value={search}
         placeholder={"Search an item"}
         className={"w-80 border mx-2"}
         onChange={(e) => setSearch(e.target.value)}

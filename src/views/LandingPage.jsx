@@ -17,6 +17,8 @@ const LandingPage = () => {
     page,
     limit,
   } = useSelector((state) => (state ? state?.product : []));
+  const user = useSelector((state) => (state ? state.user : []));
+
   const dispatch = useDispatch();
   const getAllProducts = async () => {
     try {
